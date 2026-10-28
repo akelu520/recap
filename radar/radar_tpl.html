@@ -1,0 +1,245 @@
+<title>题材轮动雷达</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F1F3F7; --surface:#FFFFFF; --surface-2:#E8EBF1; --line:#D9DDE7;
+  --ink:#13161D; --ink-2:#575F70; --ink-3:#8A92A3;
+  --accent:#2A3F6B; --accent-soft:#E2E8F5;
+  --up:#D1342F; --down:#148C5A; --flat:#8A92A3;
+  --fire:#C2410C; --fire-soft:#FCEAE0;
+  --fade:#8A6D1E; --fade-soft:#F6EFD9;
+  --shadow:0 1px 2px rgba(19,22,29,.05),0 10px 28px -20px rgba(19,22,29,.35);
+  --r:12px;
+  --f-lab:"IBM Plex Sans Condensed","Noto Sans SC",system-ui,sans-serif;
+  --f-body:"Noto Sans SC",system-ui,sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C0F14; --surface:#151921; --surface-2:#1D222C; --line:#2A303B;
+    --ink:#E8EBF2; --ink-2:#A4ABBA; --ink-3:#6F778A;
+    --accent:#8AA4E4; --accent-soft:#1B2338;
+    --up:#FF5A52; --down:#2FBE7C; --flat:#8A92A3;
+    --fire:#F08A4B; --fire-soft:#2E1B0F;
+    --fade:#D9B45A; --fade-soft:#2A2312;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 28px -20px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C0F14; --surface:#151921; --surface-2:#1D222C; --line:#2A303B;
+  --ink:#E8EBF2; --ink-2:#A4ABBA; --ink-3:#6F778A;
+  --accent:#8AA4E4; --accent-soft:#1B2338;
+  --up:#FF5A52; --down:#2FBE7C; --flat:#8A92A3;
+  --fire:#F08A4B; --fire-soft:#2E1B0F;
+  --fade:#D9B45A; --fade-soft:#2A2312;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 28px -20px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;
+  display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.lab{font-family:var(--f-lab);text-transform:uppercase;letter-spacing:.1em;
+  font-size:10.5px;font-weight:600;color:var(--ink-3)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:5px}
+
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-lab);font-size:26px;font-weight:700}
+.mkt{text-align:right}
+.mkt .v{font-family:var(--f-num);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.mkt .d{font-family:var(--f-num);font-size:11px;color:var(--ink-3)}
+
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sm{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+.sm .n{font-family:var(--f-num);font-size:22px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.sm .t{font-size:11.5px;color:var(--ink-3)}
+
+/* 题材卡 */
+.themes{display:flex;flex-direction:column;gap:10px}
+.theme{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.theme.fire{border-left:4px solid var(--fire)}
+.theme.fade{border-left:4px solid var(--fade)}
+.th{appearance:none;width:100%;background:none;border:0;font:inherit;color:inherit;
+  text-align:left;cursor:pointer;padding:14px 16px;display:grid;
+  grid-template-columns:1fr auto;gap:6px 12px;align-items:center}
+.th .name{font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-family:var(--f-lab);font-size:10.5px;font-weight:700;letter-spacing:.06em;
+  padding:2px 7px;border-radius:5px;white-space:nowrap}
+.badge.fire{background:var(--fire-soft);color:var(--fire)}
+.badge.fade{background:var(--fade-soft);color:var(--fade)}
+.badge.calm{background:var(--surface-2);color:var(--ink-3)}
+.th .score{font-family:var(--f-num);font-size:20px;font-weight:700;text-align:right;
+  font-variant-numeric:tabular-nums;line-height:1}
+.th .score small{font-size:12px;color:var(--ink-3);font-weight:500}
+.th .meta{font-size:12px;color:var(--ink-2);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.th .meta b{font-family:var(--f-num);font-weight:700}
+.spark{display:flex;align-items:flex-end;gap:2px;height:22px;justify-self:end}
+.spark i{width:7px;border-radius:1.5px;background:var(--surface-2);display:block;min-height:2px}
+.spark i.hot{background:var(--fire)}
+.spark i.warm{background:var(--fire);opacity:.4}
+.chev{font-size:11px;color:var(--ink-3);transition:transform .15s}
+.theme[open-state="1"] .chev{transform:rotate(90deg)}
+
+.body{border-top:1px solid var(--line);padding:6px 10px 12px}
+.row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;
+  padding:9px 6px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.nm b{font-weight:600;font-size:14px}
+.nm .code{font-family:var(--f-num);font-size:10.5px;color:var(--ink-3);margin-left:5px}
+.nm .why{font-size:10.5px;color:var(--ink-3);margin-top:1px;font-family:var(--f-num)}
+.px{text-align:right}
+.px .p{font-family:var(--f-num);font-size:14px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.px .c{font-family:var(--f-num);font-size:11.5px;font-weight:700}
+.dots{display:flex;gap:3px}
+.dots i{width:8px;height:16px;border-radius:2px;background:var(--surface-2);display:block}
+.dots i.on{background:var(--fire)}
+.tlrow{display:flex;justify-content:space-between;gap:4px;padding:10px 6px 2px;
+  font-family:var(--f-num);font-size:10.5px;color:var(--ink-3)}
+.tlrow span{flex:1;text-align:center}
+.tlrow span.hot{color:var(--fire);font-weight:700}
+
+details.rules{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 18px}
+summary{cursor:pointer;font-family:var(--f-lab);font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-2);font-weight:600}
+details p{margin:10px 0 0;font-size:13px;color:var(--ink-2);line-height:1.65}
+details code{font-family:var(--f-num);font-size:12px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.warn{margin-top:12px;padding:11px 13px;background:var(--fade-soft);border-radius:8px;
+  font-size:12.5px;color:var(--fade);line-height:1.6}
+footer{font-size:11.5px;color:var(--ink-3);text-align:center;line-height:1.7}
+@media (max-width:420px){
+  .summary .n{font-size:19px}
+  .row{grid-template-columns:1fr auto;row-gap:6px}
+  .dots{grid-column:2;justify-self:end}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="lab" id="dt">—</div>
+      <h1>题材轮动雷达</h1>
+    </div>
+    <div class="mkt"><div class="v" id="ix">—</div><div class="d">深证成指</div></div>
+  </header>
+
+  <div class="summary" id="sum"></div>
+
+  <div class="themes" id="themes"></div>
+
+  <details class="rules">
+    <summary>规则与局限</summary>
+    <p>每只票每天打 0–3 分：<br>
+      <code>+1</code> 成交量 ≥ 过去 20 日均量 × <span id="r-vol">1.8</span><br>
+      <code>+1</code> 当日上涨 且 收盘站上 20 日均线<br>
+      <code>+1</code> 5 日涨幅 − 深证成指 5 日涨幅 ≥ <span id="r-rs">3</span>%<br>
+      题材内满 3 分的票 ≥ <b id="r-trig">3</b> 只 → <b>共振</b>。近 8 日内曾共振、今天没有 → <b>消退</b>。</p>
+    <p>设计思路：单票放量只是个股事件，多只同日放量且跑赢大盘，可能是资金在做题材轮动。条形图是近 8 个交易日每天满分的票数。</p>
+    <div class="warn"><b>回测结论：这套规则没有可靠优势。</b>2023-10 至 2026-09，这 25 只票共出现 30 次共振，信号后 20 个交易日平均跑赢深证成指 3.2%、胜率 57%；而同一批票任意一天买入，平均也能跑赢 3.0%。2024 年表现好，2025–2026 年失效；没有共振、单独放量的票反而比共振中的票表现更好。请把「共振」当作值得去看一眼的线索，不要当作买入信号。</div>
+  </details>
+
+  <footer>交易日收盘后自动更新 · 数据来自 Longbridge<br>仅为数据工具，不构成任何买卖建议</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var SEED = /*SEED*/null/*END*/;
+  var open = {};
+
+  function f(n,d){ return Number(n).toFixed(d===undefined?2:d); }
+  function sg(n,d){ return (n>0?"+":"")+f(n,d===undefined?1:d); }
+  function col(v){ return v>0?"var(--up)":v<0?"var(--down)":"var(--flat)"; }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+  function status(t, trig){
+    if (t.fired) return "fire";
+    var peak = Math.max.apply(null, t.timeline.map(function(x){ return x.n; }));
+    return peak >= trig ? "fade" : "calm";
+  }
+  var LABEL = {fire:"共振", fade:"消退", calm:"平静"};
+
+  function render(s){
+    var R = s.rules || {volMult:1.8, rsGap:3, trigger:3};
+    var trig = R.trigger;
+    document.getElementById("r-vol").textContent = R.volMult;
+    document.getElementById("r-rs").textContent = R.rsGap;
+    document.getElementById("r-trig").textContent = trig;
+    document.getElementById("dt").textContent = s.updated || s.date;
+    var ix = document.getElementById("ix");
+    ix.innerHTML = f(s.index.close,0) + ' <span style="color:' + col(s.index.chg) + '">' +
+      sg(s.index.chg) + '%</span>';
+
+    var st = s.themes.map(function(t){ return status(t, trig); });
+    var nFire = st.filter(function(x){ return x==="fire"; }).length;
+    var nFade = st.filter(function(x){ return x==="fade"; }).length;
+    document.getElementById("sum").innerHTML =
+      '<div class="sm"><div class="n" style="color:var(--fire)">' + nFire + '</div><div class="t">共振中</div></div>' +
+      '<div class="sm"><div class="n" style="color:var(--fade)">' + nFade + '</div><div class="t">信号消退</div></div>' +
+      '<div class="sm"><div class="n">' + s.themes.length + '</div><div class="t">监控题材</div></div>';
+
+    if (!Object.keys(open).length && s.themes.length) open[s.themes[0].id] = true;
+
+    document.getElementById("themes").innerHTML = s.themes.map(function(t, k){
+      var state = st[k];
+      var max = Math.max(trig, Math.max.apply(null, t.timeline.map(function(x){ return x.n; })));
+      var spark = t.timeline.map(function(x){
+        var h = Math.max(2, Math.round(x.n / max * 22));
+        var c = x.n >= trig ? "hot" : x.n > 0 ? "warm" : "";
+        return '<i class="' + c + '" style="height:' + h + 'px" title="' + esc(x.d) + ' ' + x.n + '只"></i>';
+      }).join("");
+      var isOpen = !!open[t.id];
+      var body = "";
+      if (isOpen) {
+        body = '<div class="body">' + t.stocks.map(function(x){
+          var on = [x.vol >= R.volMult, !!x.ma, x.rs >= R.rsGap], dots = "";
+          for (var i=0;i<3;i++) dots += '<i class="' + (on[i]?"on":"") + '"></i>';
+          return '<div class="row"><div class="nm"><b>' + esc(x.name) + '</b><span class="code">' +
+            esc(x.code) + '</span><div class="why">量 ' + f(x.vol,1) + 'x · ' +
+            (x.ma ? "站上MA20" : "未站上") + ' · 超额 ' + sg(x.rs,0) + '%</div></div>' +
+            '<div class="px"><div class="p">' + f(x.px) + '</div><div class="c" style="color:' +
+            col(x.chg) + '">' + sg(x.chg) + '%</div></div><div class="dots">' + dots + '</div></div>';
+        }).join("") +
+        '<div class="tlrow">' + t.timeline.map(function(x){
+          return '<span class="' + (x.n >= trig ? "hot" : "") + '">' + esc(x.d) + '<br>' + x.n + '</span>';
+        }).join("") + '</div></div>';
+      }
+      return '<section class="theme ' + state + '" open-state="' + (isOpen?1:0) + '">' +
+        '<button class="th" type="button" data-id="' + esc(t.id) + '" aria-expanded="' + isOpen + '">' +
+          '<span class="name"><span class="chev">▶</span>' + esc(t.name) +
+            '<span class="badge ' + state + '">' + LABEL[state] + '</span></span>' +
+          '<span class="score">' + t.hits + '<small>/' + t.total + '</small></span>' +
+          '<span class="meta">板块 <b style="color:' + col(t.basketChg) + '">' + sg(t.basketChg) +
+            '%</b> 均分 <b>' + f(t.avgScore,1) + '</b></span>' +
+          '<span class="spark">' + spark + '</span>' +
+        '</button>' + body + '</section>';
+    }).join("");
+  }
+
+  document.getElementById("themes").addEventListener("click", function(e){
+    var b = e.target.closest(".th"); if (!b) return;
+    var id = b.getAttribute("data-id");
+    open[id] = !open[id];
+    render(current);
+  });
+
+  var current = SEED;
+  if (current) render(current);
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then(function(db){
+      if (!db) return;
+      return db.doc("snapshots/latest").get().then(function(doc){
+        var d = doc && (doc.data || doc);
+        if (d && d.themes && d.date && (!current || d.date >= current.date)) {
+          current = d; render(current);
+        }
+      });
+    }).catch(function(){});
+  }
+})();
+</script>

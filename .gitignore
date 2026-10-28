@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.pyc
+
+# 运行产物
+raw.json
+paper_state.json
+paper_log.jsonl
